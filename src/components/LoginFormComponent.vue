@@ -1,40 +1,70 @@
 <template>
-  <div class="loginForm">
+  <div v-if="!isLogin" class="loginForm"><!--로그인 되어있을 시-->
     <input v-model="userId" placeholder="아이디 입력" type="text" />
     <input v-model="password" placeholder="비밀번호 입력" type="password">
     <button v-on:click="getLogin">로그인</button>
   </div>
+  <div v-if="isLogin">
+    환영합니다 {{ userId }}!!!
+  </div>
 </template>
 
 <script>
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import axios from "axios";
 
 export default {
   name: 'LoginFormComponent', // 필수 X
+  // 부모 컴포넌트에서 받는 속성값
   props: {
     msg: String
   },
   setup(){
+    // 통신할 유저 아이디 및 패스워드
     let userId = ref('');
     let password = ref('');
+    // 로그인 여부를 판단하는 불린값
+    let isLogin = ref(false);
 
     // 템플릿에서 사용할 함수 표현식 정의
     const getLogin = () => {
       // 서버로의 통신
-      axios.get("http://localhost:8080/api/login", {
-        params:{
+      axios.post("http://localhost:8080/api/login", {
           userId : userId.value,
           password : password.value
-        }
+      },{
+        // withCredentials: true //쿠키, Authorization 인증 헤더같은 자격인증을 사용하는 여부로로 보통 라이브러리에서는 기본적으로 false로 되어있음
       }).then((response)=>{
+        // 서버 응답값이 아래와 같을 경우
+        response.data = "success"
+        // 로그인 여부를 true로 변경
+        isLogin.value = true
 
-        console.log(response)
       })
     }
 
+    // vue 앱이 마운트시 사용될 로그인 체크 함수
+    const checkLogin = () => {
+      axios.get("http://localhost:8080/api/checkLogin")
+          .then((response) =>{
+            // 로그인 여부 set
+            isLogin.value = response.data.isLogin === 'true'? true : false
+            // userId set
+            userId.value = response.data.userId
+          }).catch((error)=>{
+            // 에러 출력
+            console.error(error)
+            // 에러시 로그인 X
+            isLogin.value = false;
+      })
+    }
 
-    return {userId, 'password':password, getLogin}; //두 속성은 동일
+    // 마운트 훅시 로그인 체크
+    onMounted(()=>{
+      checkLogin()
+    })
+
+    return {userId, 'password':password,isLogin, getLogin}; //두 속성은 동일
   }
 }
 </script>
