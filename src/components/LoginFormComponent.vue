@@ -33,7 +33,7 @@ export default {
           userId : userId.value,
           password : password.value
       },{
-        withCredentials: true //쿠키, Authorization 인증 헤더같은 자격인증을 사용하는 여부로로 보통 라이브러리에서는 기본적으로 false로 되어있음
+        withCredentials: true //쿠키, Authorization 인증 헤더같은 자격인증을 사용하는 여부로로 보통 라이브러리에서는 기본적으로 false로 되어있음 // httpOnly가 붙어있는 쿠키의 경우 해당 설정값이 없으면 전송하지 않음
       }).then((response)=>{
         // 서버 응답값이 아래와 같을 경우
         response.data = "success"
@@ -47,7 +47,7 @@ export default {
     // 역시 민감한정보쿠키가(session) 가 포함되어 있기 때문에 withCredentials 옵션값을 추가해야한다
     const checkLogin = () => {
       axios.get("http://localhost:8080/api/checkLogin",{
-        withCredentials:true
+        withCredentials:true //쿠키, Authorization 인증 헤더같은 자격인증을 사용하는 여부로로 보통 라이브러리에서는 기본적으로 false로 되어있음 // httpOnly가 붙어있는 쿠키의 경우 해당 설정값이 없으면 전송하지 않음
       })
           .then((response) =>{
             // 로그인 여부 set
