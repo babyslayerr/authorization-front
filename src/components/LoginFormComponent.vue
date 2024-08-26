@@ -2,10 +2,12 @@
   <div v-if="!isLogin" class="loginForm"><!--로그인 되어있을 시-->
     <input v-model="userId" placeholder="아이디 입력" type="text" />
     <input v-model="password" placeholder="비밀번호 입력" type="password">
-    <button v-on:click="getLogin">로그인</button>
+    <button v-on:click="getLogin" type="button">로그인</button>
   </div>
-  <div v-if="isLogin">
-    환영합니다 {{ userId }}!!!
+  <div v-if="isLogin" class="loginForm">
+    <div style="color: darkgray; font-size: 30px; ">환영합니다 {{ userId }}!!!</div>
+    <br/>
+    <button v-on:click="logout" type="button">로그아웃</button>
   </div>
 </template>
 
@@ -36,10 +38,10 @@ export default {
         withCredentials: true //쿠키, Authorization 인증 헤더같은 자격인증을 사용하는 여부로로 보통 라이브러리에서는 기본적으로 false로 되어있음 // httpOnly가 붙어있는 쿠키의 경우 해당 설정값이 없으면 전송하지 않음
       }).then((response)=>{
         // 서버 응답값이 아래와 같을 경우
-        response.data = "success"
-        // 로그인 여부를 true로 변경
-        isLogin.value = true
-
+        if(response.data === "success") {
+          // 로그인 여부를 true로 변경
+          isLogin.value = true;
+        }
       })
     }
 
@@ -62,6 +64,21 @@ export default {
       })
     }
 
+    // 로그아웃 - 서버에서 세션 invalid
+    const logout = () => {
+      axios.get("http://localhost:8080/api/logout",{
+        withCredentials:true // 세션같은 민감한 정보 전송여부
+      })
+          .then((response)=>{
+            // 서버 응답값 출력
+            alert("server : " + response.data);
+            // 다시 로그인 여부 api 실행
+            checkLogin();
+          }).catch((error)=>{
+            console.error(error)
+      })
+    }
+
     // setup시 항상 실행
     checkLogin()
     // 마운트 훅시 로그인 체크(앱이 dom객체에 마운트 즉 연결 되었을 때, 보통 dom객체 사용이 필요할 때 사용한다)
@@ -69,7 +86,7 @@ export default {
       // checkLogin()
     })
 
-    return {userId, 'password':password,isLogin, getLogin}; //두 속성은 동일
+    return {userId, 'password':password,isLogin, getLogin ,logout}; //두 속성은 동일
   }
 }
 </script>
@@ -88,19 +105,33 @@ button{
   /* margine-top 0 , center*/
   margin: 0 auto;
   /* buuton border 두께, 스타일, 컬러*/
-  border: 1px solid #ddd;
+  border: 3px solid #77af9c;
+  /*모서리 라운딩 처리*/
+  border-radius: 15px;
   background-color: #fff;
+
+  /*font 진하기*/
+  font-weight: 600;
+
+  /*버튼크기를 위한 확장*/
+  padding: 10px 30px;
+
+  /*글자색상*/
+  color: darkgray;
+
+
 }
 
 input{
   /*input border 두께, 스타일, 컬러 */
-  border: 1px solid #ddd;
+  border: 3px solid #ddd;
   border-radius: 5px;
   font-family: '맑은 고딕';
-
   margin: 10px;
   /* 높이 조절 */
   padding: 10px;
 }
+
+
 
 </style>
